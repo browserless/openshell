@@ -33,7 +33,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Lint and import every profile
+      - name: Lint, import and attach every profile
         env:
           OPENSHELL_VERSION: ${{ matrix.openshell }}
         run: scripts/lint-profiles.sh

@@ -26,12 +26,15 @@
 #                    query parameter, BROWSERLESS_MCP_TOKEN as a bearer
 #                    authorization header. Sent only to the endpoints below.
 # Endpoint access:   the regional Browserless hosts (production-*.browserless.io):
-#                    REST and BrowserQL over HTTP, plus CDP and Playwright
-#                    WebSocket upgrades on the connect and reconnect paths; and
-#                    the hosted MCP server at mcp.browserless.io/mcp. The Stripe
-#                    Link payment tools (browserless_link_checkout,
-#                    browserless_link_connect) stay denied; remove those deny
-#                    rules only if your workload is approved to pay.
+#                    REST over HTTP; BrowserQL as single anonymous GraphQL
+#                    operations, without the `reconnect` mutation; and CDP
+#                    and Playwright WebSocket upgrades on the connect paths
+#                    and on the worker-pinned session and reconnect URLs the
+#                    API returns. Plus the hosted MCP server at
+#                    mcp.browserless.io/mcp. The Stripe Link payment tools
+#                    (browserless_link_checkout, browserless_link_connect) stay
+#                    denied; remove those deny rules only if your workload is
+#                    approved to pay.
 # Smoke test:        openshell sandbox create --no-keep --from node:24-bookworm-slim \
 #                      --provider <name> -- node -e '
 #                      fetch(`https://production-sfo.browserless.io/content?token=${process.env.BROWSERLESS_TOKEN}`, {
@@ -60,13 +63,21 @@ credentials:
 discovery:
   credentials: [api_token, mcp_token]
 endpoints:
-  # REST APIs and BrowserQL over HTTP. `full` lets an agent stop its own
-  # sessions (DELETE /session/...); use explicit rules for narrower access.
+  # REST APIs over HTTP. `full` lets an agent stop its own sessions
+  # (DELETE /session/...); use explicit rules for narrower access.
   - host: "production-*.browserless.io"
     port: 443
     protocol: rest
     access: full
     enforcement: enforce
+  # BrowserQL, on every path that ends in /bql or continues after /bql/,
+  # including URLs that carry a path prefix. `*` also matches `/`. Each
+  # request must be a single anonymous operation (named operations are
+  # denied). Every query and mutation is allowed except `reconnect`, which
+  # hands the live browser to another client; agents that need to keep a
+  # browser between connections use durable sessions (POST /session) instead.
+  - { host: "production-*.browserless.io", port: 443, path: "/*/bql", protocol: graphql, access: full, enforcement: enforce, deny_rules: [{ operation_type: mutation, fields: [reconnect] }, { operation_type: query, operation_name: "?*" }, { operation_type: mutation, operation_name: "?*" }, { operation_type: subscription, operation_name: "?*" }] }
+  - { host: "production-*.browserless.io", port: 443, path: "/*/bql/*", protocol: graphql, access: full, enforcement: enforce, deny_rules: [{ operation_type: mutation, fields: [reconnect] }, { operation_type: query, operation_name: "?*" }, { operation_type: mutation, operation_name: "?*" }, { operation_type: subscription, operation_name: "?*" }] }
   # CDP and Playwright WebSocket upgrades. Client messages are JSON text.
   - { host: "production-*.browserless.io", port: 443, path: "/", protocol: websocket, access: read-write, enforcement: enforce }
   - { host: "production-*.browserless.io", port: 443, path: "/chromium", protocol: websocket, access: read-write, enforcement: enforce }
@@ -75,16 +86,14 @@ endpoints:
   - { host: "production-*.browserless.io", port: 443, path: "/chromium/stealth", protocol: websocket, access: read-write, enforcement: enforce }
   - { host: "production-*.browserless.io", port: 443, path: "/chromium/playwright", protocol: websocket, access: read-write, enforcement: enforce }
   - { host: "production-*.browserless.io", port: 443, path: "/chrome/playwright", protocol: websocket, access: read-write, enforcement: enforce }
-  - { host: "production-*.browserless.io", port: 443, path: "/reconnect/**", protocol: websocket, access: read-write, enforcement: enforce }
-  - { host: "production-*.browserless.io", port: 443, path: "/chromium/stealth/reconnect/**", protocol: websocket, access: read-write, enforcement: enforce }
-  - { host: "production-*.browserless.io", port: 443, path: "/session/connect/**", protocol: websocket, access: read-write, enforcement: enforce }
-  # Session and reconnect URLs returned by the API are pinned to one worker
-  # under /e/<id>/. A trailing /** is a literal prefix in OpenShell, so these
-  # use *, which also matches /: each pattern covers any /e/<id>/... path that
-  # ends in that suffix.
-  - { host: "production-*.browserless.io", port: 443, path: "/e/*/session/connect/*", protocol: websocket, access: read-write, enforcement: enforce }
-  - { host: "production-*.browserless.io", port: 443, path: "/e/*/reconnect/*", protocol: websocket, access: read-write, enforcement: enforce }
-  - { host: "production-*.browserless.io", port: 443, path: "/e/*/chromium/stealth/reconnect/*", protocol: websocket, access: read-write, enforcement: enforce }
+  # Durable-session connect URLs and reconnect URLs. The API returns them
+  # pinned to one worker under /e/<id>/. A trailing /** is a literal prefix in
+  # OpenShell, so these use *, which also matches /: each pattern covers any
+  # /e/<id>/... path that ends in that suffix. The deny rules refuse WebSocket
+  # upgrades to BrowserQL paths, which go through the graphql endpoints instead.
+  - { host: "production-*.browserless.io", port: 443, path: "/e/*/session/connect/*", protocol: websocket, access: read-write, enforcement: enforce, deny_rules: [{ method: "*", path: "/**/bql" }, { method: "*", path: "/**/bql/**" }] }
+  - { host: "production-*.browserless.io", port: 443, path: "/e/*/reconnect/*", protocol: websocket, access: read-write, enforcement: enforce, deny_rules: [{ method: "*", path: "/**/bql" }, { method: "*", path: "/**/bql/**" }] }
+  - { host: "production-*.browserless.io", port: 443, path: "/e/*/chromium/stealth/reconnect/*", protocol: websocket, access: read-write, enforcement: enforce, deny_rules: [{ method: "*", path: "/**/bql" }, { method: "*", path: "/**/bql/**" }] }
   # Hosted MCP server, Streamable HTTP.
   - host: mcp.browserless.io
     port: 443

@@ -33,8 +33,10 @@ endpoints:
     enforcement: enforce
     rules:
       - allow: { method: POST, path: "/content" }
-      - allow: { method: POST, path: "/chromium/bql" }
-      - allow: { method: GET, path: "/json/**" }
+      - allow: { method: GET, path: "/json/*" }
+      - allow: { method: GET, path: "/json/*/" }
+  # BrowserQL on /chromium/bql: single anonymous operations, without `reconnect`.
+  - { host: "production-*.browserless.io", port: 443, path: "/chromium/bql", protocol: graphql, access: full, enforcement: enforce, deny_rules: [{ operation_type: mutation, fields: [reconnect] }, { operation_type: query, operation_name: "?*" }, { operation_type: mutation, operation_name: "?*" }, { operation_type: subscription, operation_name: "?*" }] }
   - { host: "production-*.browserless.io", port: 443, path: "/", protocol: websocket, access: read-write, enforcement: enforce }
   - host: mcp.browserless.io
     port: 443

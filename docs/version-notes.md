@@ -2,13 +2,13 @@
 
 The profiles here need **OpenShell 0.1.8 or newer**. They were tested on 0.1.8: REST, BrowserQL, Puppeteer, Playwright (CDP and native), durable sessions, the LON and AMS regions, the hosted MCP server, and the Stripe Link approval flow. Earlier releases are not supported.
 
-CI lints and imports every profile against the latest OpenShell release and against 0.1.8 on each pull request and once a week.
+CI lints and imports every profile, and starts a sandbox with a provider built from each to check that the gateway accepts its policy, against the latest OpenShell release and against 0.1.8 on each pull request and once a week.
 
 ## What 0.1.8 changed
 
 Two 0.1.8 changes shape the main profile:
 
-- **REST endpoints refuse WebSocket upgrades.** CDP and Playwright connections need endpoints with `protocol: websocket`. The main profile declares one for each connect and reconnect path, including the worker-pinned `/e/<id>/…` URLs that durable sessions return. Any other WebSocket path is refused.
+- **REST endpoints refuse WebSocket upgrades.** CDP and Playwright connections need endpoints with `protocol: websocket`. The main profile declares one for each CDP and Playwright connect path, and for the worker-pinned `/e/<id>/…` session and reconnect URLs that the API returns. Any other WebSocket path is refused.
 - **Credentials resolve only where the profile places them.** `BROWSERLESS_TOKEN` resolves only as the `token` query parameter, and `BROWSERLESS_MCP_TOKEN` only as the `Authorization: Bearer` header. Send each where the profile expects it.
 
 ## Updating a profile

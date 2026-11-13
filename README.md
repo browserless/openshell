@@ -68,8 +68,9 @@ The main profile, `providers/browserless.yaml`:
 - **One token, two placements.** `BROWSERLESS_TOKEN` resolves only as the `token` query parameter, and `BROWSERLESS_MCP_TOKEN` only as an `Authorization: Bearer` header. Create both from the same Browserless API token.
 - **Only Browserless hosts.** The token is sent only to `production-*.browserless.io` (the SFO, LON and AMS regions) and to `mcp.browserless.io/mcp`. Requests from the sandbox to any other host are blocked by the sandbox's network policy.
 - **Only the processes you list.** `binaries` lets `node` and `curl` at `/usr/bin` or `/usr/local/bin` reach those hosts. Edit it to match your image.
-- **REST and BrowserQL** with full access, including `DELETE` so an agent can stop its own sessions.
-- **WebSockets** only on the CDP and Playwright connect and reconnect paths, including the worker-pinned URLs that durable sessions return.
+- **REST** with full access, including `DELETE` so an agent can stop its own sessions.
+- **BrowserQL**: every query and mutation except `reconnect`, which hands the live browser to another client. Send each request as a single anonymous operation (`mutation { … }`); named operations are denied. To keep a browser between connections, use a durable session (`POST /session`) and the connect and BrowserQL URLs it returns.
+- **WebSockets** only on the CDP and Playwright connect paths, and on the worker-pinned session and reconnect URLs that the API returns.
 - **Every MCP tool except the Stripe Link payment tools.** OpenShell answers `browserless_link_checkout` and `browserless_link_connect` with `policy_denied`. Remove those deny rules only if your workload is approved to pay, or use the [approval flow](docs/stripe-link-approval.md).
 
 Usage is billed to the Browserless account that owns the token, as it is outside OpenShell.
@@ -111,12 +112,12 @@ Details, and what each profile was tested on: [docs/version-notes.md](docs/versi
 providers/                     OpenShell provider profiles
 docs/                          Version notes, NemoClaw's MCP route, Stripe Link approval
 examples/                      Puppeteer, Playwright, BrowserQL and MCP clients, and a sandbox image
-scripts/lint-profiles.sh       Lints and imports every profile against a throwaway gateway (CI)
+scripts/lint-profiles.sh       Lints, imports and attaches every profile on a throwaway gateway (CI)
 scripts/smoke.sh               The quick check above
 assets/logo.svg                Browserless logo
 ```
 
-CI runs `scripts/lint-profiles.sh` against the latest OpenShell release and against 0.1.8 on every pull request and once a week. It runs on Linux with Docker; locally:
+CI runs `scripts/lint-profiles.sh` against the latest OpenShell release and against 0.1.8 on every pull request and once a week. It runs on Linux with Docker and a kernel with Landlock; locally:
 
 ```shell
 OPENSHELL_VERSION=v0.1.8 scripts/lint-profiles.sh
