@@ -31,10 +31,12 @@
 #                    and Playwright WebSocket upgrades on the connect paths
 #                    and on the worker-pinned session and reconnect URLs the
 #                    API returns. Plus the hosted MCP server at
-#                    mcp.browserless.io/mcp. The Stripe Link payment tools
+#                    mcp.browserless.io/mcp. The Stripe Link MCP tools
 #                    (browserless_link_checkout, browserless_link_connect) stay
-#                    denied; remove those deny rules only if your workload is
-#                    approved to pay.
+#                    denied. REST stays open, including Browserless's own agent
+#                    endpoints, which can use a Stripe Link wallet connected to
+#                    the account; for such an account use
+#                    browserless-linkgated.yaml instead.
 # Smoke test:        openshell sandbox create --no-keep --from node:24-bookworm-slim \
 #                      --provider <name> -- node -e '
 #                      fetch(`https://production-sfo.browserless.io/content?token=${process.env.BROWSERLESS_TOKEN}`, {

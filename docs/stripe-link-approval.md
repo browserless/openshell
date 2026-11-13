@@ -1,6 +1,6 @@
 # Stripe Link behind human approval
 
-Browserless can pay with a [Stripe Link](https://link.com) wallet. The main profile denies both Stripe Link MCP tools, `browserless_link_checkout` and `browserless_link_connect`. When an agent should be able to use the wallet only after a person says yes, use the two profiles below instead. They need OpenShell 0.1.8 or newer and were tested on 0.1.8.
+Browserless can pay with a [Stripe Link](https://link.com) wallet. The main profile denies both Stripe Link MCP tools, `browserless_link_checkout` and `browserless_link_connect`, but keeps REST open, and Browserless's own agent endpoints can use a connected wallet. If the account has a connected wallet, or an agent should use the wallet only after a person says yes, use the two profiles below instead. They need OpenShell 0.1.8 or newer and were tested on 0.1.8.
 
 - `providers/browserless-linkgated.yaml` covers ordinary browsing: REST `/content`, BrowserQL on `/chromium/bql` (single anonymous operations, without `reconnect`), `/json/*` discovery, CDP on `/`, and the MCP tools `browserless_smartscraper` and `browserless_usage`. Every Stripe Link REST path is outside it, and `browserless_link_checkout` is always denied.
 - `providers/browserless-link-approve.yaml` is credential-free. Attaching it to a sandbox allows `browserless_link_connect`; detaching it takes that away again.

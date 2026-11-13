@@ -16,4 +16,4 @@ endpoints:
     enforcement: enforce
     rules:
       - allow: { method: tools/call, tool: browserless_link_connect }
-binaries: [/usr/bin/node, /usr/local/bin/node]
+binaries: [/usr/bin/node, /usr/local/bin/node, /usr/bin/curl, /usr/local/bin/curl]

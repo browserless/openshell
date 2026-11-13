@@ -55,7 +55,7 @@ NemoClaw pins an older OpenShell release, which these profiles do not support. [
 
 | Profile | Use it for |
 |---|---|
-| [`providers/browserless.yaml`](providers/browserless.yaml) | REST, BrowserQL, Puppeteer and Playwright (CDP and native), durable sessions in every region, and the hosted MCP server. The Stripe Link payment tools are denied. |
+| [`providers/browserless.yaml`](providers/browserless.yaml) | REST, BrowserQL, Puppeteer and Playwright (CDP and native), durable sessions in every region, and the hosted MCP server. The two Stripe Link MCP tools are denied; REST stays open (see [what it allows](#what-these-profiles-allow)). |
 | [`providers/browserless-linkgated.yaml`](providers/browserless-linkgated.yaml) | Ordinary browsing, with Stripe Link only after a person approves. See [docs/stripe-link-approval.md](docs/stripe-link-approval.md). |
 | [`providers/browserless-link-approve.yaml`](providers/browserless-link-approve.yaml) | Credential-free companion an operator attaches to allow `browserless_link_connect`, and detaches to revoke. |
 
@@ -71,7 +71,7 @@ The main profile, `providers/browserless.yaml`:
 - **REST** with full access, including `DELETE` so an agent can stop its own sessions.
 - **BrowserQL**: every query and mutation except `reconnect`, which hands the live browser to another client. Send each request as a single anonymous operation (`mutation { … }`); named operations are denied. To keep a browser between connections, use a durable session (`POST /session`) and the connect and BrowserQL URLs it returns.
 - **WebSockets** only on the CDP and Playwright connect paths, and on the worker-pinned session and reconnect URLs that the API returns.
-- **Every MCP tool except the Stripe Link payment tools.** OpenShell answers `browserless_link_checkout` and `browserless_link_connect` with `policy_denied`. Remove those deny rules only if your workload is approved to pay, or use the [approval flow](docs/stripe-link-approval.md).
+- **Every MCP tool except the two Stripe Link tools.** OpenShell answers `browserless_link_checkout` and `browserless_link_connect` with `policy_denied`. These rules cover the MCP tools only. REST stays open, including Browserless's own agent endpoints, which can use a Stripe Link wallet connected to the account. If the account has a connected wallet, use the [Link-gated profiles](docs/stripe-link-approval.md), whose REST access is an allow-list.
 
 Usage is billed to the Browserless account that owns the token, as it is outside OpenShell.
 
