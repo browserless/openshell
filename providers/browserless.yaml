@@ -1,0 +1,102 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Browserless
+# SPDX-License-Identifier: MIT
+#
+# Browserless provider profile for NVIDIA OpenShell 0.1.8 or newer.
+#   openshell provider profile import --global \
+#     --url https://raw.githubusercontent.com/browserless/openshell/main/providers/browserless.yaml
+#
+# Copy and edit this file rather than importing it unchanged when your image
+# differs from the reference layout. `binaries` is the least-privilege control
+# that decides which processes may reach the endpoints below, so it has to name
+# the paths in *your* image.
+#
+# Client binaries:   node (puppeteer-core, playwright-core, MCP SDK clients) and
+#                    curl. Python Playwright drives Chromium through its bundled
+#                    node driver under site-packages/playwright/driver/; add that
+#                    path if your image uses it.
+# Reference layout:  node and curl on PATH at /usr/bin or /usr/local/bin.
+#                    Connect CDP clients to wss://production-sfo.browserless.io
+#                    (or production-lon / production-ams) with
+#                    ?token=$BROWSERLESS_TOKEN, and send
+#                    Authorization: Bearer $BROWSERLESS_MCP_TOKEN to the hosted
+#                    MCP server. Create the provider with both credentials set
+#                    to the same Browserless API token.
+# Credential scope:  one Browserless API token, declared twice so each request
+#                    location is explicit: BROWSERLESS_TOKEN as the `token`
+#                    query parameter, BROWSERLESS_MCP_TOKEN as a bearer
+#                    authorization header. Sent only to the endpoints below.
+# Endpoint access:   the regional Browserless hosts (production-*.browserless.io):
+#                    REST and BrowserQL over HTTP, plus CDP and Playwright
+#                    WebSocket upgrades on the connect and reconnect paths; and
+#                    the hosted MCP server at mcp.browserless.io/mcp. The Stripe
+#                    Link payment tools (browserless_link_checkout,
+#                    browserless_link_connect) stay denied; remove those deny
+#                    rules only if your workload is approved to pay.
+# Smoke test:        openshell sandbox create --no-keep --from node:24-bookworm-slim \
+#                      --provider <name> -- node -e '
+#                      fetch(`https://production-sfo.browserless.io/content?token=${process.env.BROWSERLESS_TOKEN}`, {
+#                        method: "POST",
+#                        headers: { "content-type": "application/json" },
+#                        body: JSON.stringify({ url: "https://example.com" }),
+#                      }).then((r) => r.text()).then(console.log)'
+
+id: browserless
+display_name: Browserless
+description: Hosted headless browsers (CDP, Playwright, BrowserQL, REST APIs) and the Browserless MCP server
+category: other
+credentials:
+  - name: api_token
+    description: Browserless API token, sent as the token query parameter
+    env_vars: [BROWSERLESS_TOKEN]
+    required: true
+    auth_style: query
+    query_param: token
+  - name: mcp_token
+    description: Browserless API token, sent as a bearer header to the MCP server
+    env_vars: [BROWSERLESS_MCP_TOKEN]
+    required: true
+    auth_style: bearer
+    header_name: authorization
+discovery:
+  credentials: [api_token, mcp_token]
+endpoints:
+  # REST APIs and BrowserQL over HTTP. `full` lets an agent stop its own
+  # sessions (DELETE /session/...); use explicit rules for narrower access.
+  - host: "production-*.browserless.io"
+    port: 443
+    protocol: rest
+    access: full
+    enforcement: enforce
+  # CDP and Playwright WebSocket upgrades. Client messages are JSON text.
+  - { host: "production-*.browserless.io", port: 443, path: "/", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/chromium", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/chrome", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/stealth", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/chromium/stealth", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/chromium/playwright", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/chrome/playwright", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/reconnect/**", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/chromium/stealth/reconnect/**", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/session/connect/**", protocol: websocket, access: read-write, enforcement: enforce }
+  # Session and reconnect URLs returned by the API are pinned to one worker
+  # under /e/<id>/. A trailing /** is a literal prefix in OpenShell, so these
+  # use *, which also matches /: each pattern covers any /e/<id>/... path that
+  # ends in that suffix.
+  - { host: "production-*.browserless.io", port: 443, path: "/e/*/session/connect/*", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/e/*/reconnect/*", protocol: websocket, access: read-write, enforcement: enforce }
+  - { host: "production-*.browserless.io", port: 443, path: "/e/*/chromium/stealth/reconnect/*", protocol: websocket, access: read-write, enforcement: enforce }
+  # Hosted MCP server, Streamable HTTP.
+  - host: mcp.browserless.io
+    port: 443
+    path: /mcp
+    protocol: mcp
+    enforcement: enforce
+    rules:
+      - allow: { method: initialize }
+      - allow: { method: notifications/initialized }
+      - allow: { method: tools/list }
+      - allow: { method: tools/call }
+    deny_rules:
+      - { method: tools/call, tool: browserless_link_checkout }
+      - { method: tools/call, tool: browserless_link_connect }
+binaries: [/usr/bin/node, /usr/local/bin/node, /usr/bin/curl, /usr/local/bin/curl]
