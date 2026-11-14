@@ -13,9 +13,8 @@ openshell provider profile import -f providers/browserless-linkgated.yaml --glob
 openshell provider profile import -f providers/browserless-link-approve.yaml --global
 
 export BROWSERLESS_TOKEN=<your Browserless API token>
-export BROWSERLESS_MCP_TOKEN="$BROWSERLESS_TOKEN"
 openshell provider create --name browserless-gated --type browserless-linkgated \
-  --credential BROWSERLESS_TOKEN --credential BROWSERLESS_MCP_TOKEN
+  --credential BROWSERLESS_TOKEN
 openshell provider create --name link-approve --type browserless-link-approve
 
 openshell sandbox create --name agent --from <your image> --provider browserless-gated

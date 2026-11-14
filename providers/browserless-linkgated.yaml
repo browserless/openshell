@@ -18,14 +18,8 @@ credentials:
     required: true
     auth_style: query
     query_param: token
-  - name: mcp_token
-    description: Browserless API token, sent as a bearer header to the MCP server
-    env_vars: [BROWSERLESS_MCP_TOKEN]
-    required: true
-    auth_style: bearer
-    header_name: authorization
 discovery:
-  credentials: [api_token, mcp_token]
+  credentials: [api_token]
 endpoints:
   - host: "production-*.browserless.io"
     port: 443

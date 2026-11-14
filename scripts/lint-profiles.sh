@@ -45,7 +45,7 @@ work="$(mktemp -d)"
 gateway_pid=""
 openshell=""
 sandboxes=()
-# shellcheck disable=SC2317 # cleanup runs from the EXIT trap
+# shellcheck disable=SC2317,SC2329 # cleanup runs from the EXIT trap
 cleanup() {
   local name
   for name in "${sandboxes[@]}"; do

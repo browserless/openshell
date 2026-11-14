@@ -9,7 +9,7 @@ CI lints and imports every profile, and starts a sandbox with a provider built f
 Two 0.1.8 changes shape the main profile:
 
 - **REST endpoints refuse WebSocket upgrades.** CDP and Playwright connections need endpoints with `protocol: websocket`. The main profile declares one for each CDP and Playwright connect path, and for the worker-pinned `/e/<id>/…` session and reconnect URLs that the API returns. Any other WebSocket path is refused.
-- **Credentials resolve only where the profile places them.** `BROWSERLESS_TOKEN` resolves only as the `token` query parameter, and `BROWSERLESS_MCP_TOKEN` only as the `Authorization: Bearer` header. Send each where the profile expects it.
+- **Credentials resolve only where the profile places them.** `BROWSERLESS_TOKEN` resolves only as the `token` query parameter, including for the MCP server. A placeholder sent in a header or a request body is not replaced.
 
 ## Updating a profile
 

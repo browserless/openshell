@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: MIT
 //
 // The hosted Browserless MCP server from inside an OpenShell sandbox.
-// BROWSERLESS_MCP_TOKEN holds an OpenShell placeholder for the bearer header.
+// BROWSERLESS_TOKEN holds an OpenShell placeholder for the token query parameter.
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
-const transport = new StreamableHTTPClientTransport(new URL('https://mcp.browserless.io/mcp'), {
-  requestInit: { headers: { Authorization: `Bearer ${process.env.BROWSERLESS_MCP_TOKEN ?? ''}` } },
-});
+const token = encodeURIComponent(process.env.BROWSERLESS_TOKEN ?? '');
+const transport = new StreamableHTTPClientTransport(new URL(`https://mcp.browserless.io/mcp?token=${token}`));
 const client = new Client({ name: 'browserless-openshell-example', version: '1.0.0' });
 
 await client.connect(transport);

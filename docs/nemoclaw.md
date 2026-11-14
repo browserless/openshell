@@ -4,16 +4,17 @@
 
 ## Hosted MCP server
 
-NemoClaw adds the hosted Browserless MCP server as a tool provider. Deny the Stripe Link payment tools when you add it:
+NemoClaw adds the hosted Browserless MCP server as a tool provider. When you add it, deny the Stripe Link payment tools and `browserless_function`, which runs your own code in the browser:
 
 ```shell
 export BROWSERLESS_TOKEN=<your Browserless API token>
 nemoclaw <sandbox> mcp add browserless --url https://mcp.browserless.io/mcp \
   --env BROWSERLESS_TOKEN \
-  --deny-tool browserless_link_checkout --deny-tool browserless_link_connect
+  --deny-tool browserless_link_checkout --deny-tool browserless_link_connect \
+  --deny-tool browserless_function
 ```
 
-NemoClaw stores the token as an OpenShell provider, and the sandbox sees only a placeholder. The agent gets every Browserless MCP tool except the two denied ones, including `browserless_agent` for multi-step browsing and `browserless_smartscraper` for single pages.
+NemoClaw stores the token as an OpenShell provider, and the sandbox sees only a placeholder. The agent gets every Browserless MCP tool except the three denied ones, including `browserless_agent` for multi-step browsing and `browserless_smartscraper` for single pages.
 
 Tested with NemoClaw v0.0.142.
 

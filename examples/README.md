@@ -1,6 +1,6 @@
 # Examples
 
-Browserless clients to run inside an OpenShell sandbox that has the `browserless` provider attached. Each script reads the OpenShell placeholders from `BROWSERLESS_TOKEN` or `BROWSERLESS_MCP_TOKEN`; OpenShell puts the real API token on the request on its way to Browserless.
+Browserless clients to run inside an OpenShell sandbox that has the `browserless` provider attached. Each script reads the OpenShell placeholder from `BROWSERLESS_TOKEN` and sends it as the `token` query parameter; OpenShell puts the real API token on the request on its way to Browserless.
 
 | Script | What it does |
 |---|---|
