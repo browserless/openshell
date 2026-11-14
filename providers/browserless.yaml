@@ -24,7 +24,8 @@
 #                    below.
 # Endpoint access:   the regional Browserless hosts (production-*.browserless.io):
 #                    REST over HTTP, except the endpoints that run your own
-#                    code in the browser (/function and /download); BrowserQL
+#                    code in the browser (/function and /download) and the
+#                    server configuration endpoint (/config); BrowserQL
 #                    as single anonymous GraphQL operations, without the
 #                    `reconnect` mutation; and CDP and Playwright WebSocket
 #                    upgrades on the connect paths and on the worker-pinned
@@ -64,8 +65,9 @@ endpoints:
   # browser, are denied in every form: bare, per browser (/chromium/function),
   # worker-pinned (/e/<id>/...), with or without a trailing slash. This also
   # covers /profile/<name>/download. /config, the server configuration
-  # endpoint, is denied the same way. The endpoint has no path, so these rules
-  # apply to every request to these hosts.
+  # endpoint, is denied the same way. This endpoint has no path, so its rules
+  # cover every path on these hosts that it handles; none of the WebSocket
+  # endpoints below overlaps these paths.
   - host: "production-*.browserless.io"
     port: 443
     protocol: rest
