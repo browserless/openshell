@@ -24,4 +24,5 @@ A gateway keeps the profile it imported; editing the YAML afterwards changes not
 
 ## Limits
 
+- **MCP revision.** OpenShell accepts MCP revision `2025-11-25` by default. A client that negotiates an older revision, such as `2025-06-18`, gets `mcp_protocol_version_not_allowed`. Use a client that supports `2025-11-25`, such as the MCP SDK version pinned in [`examples/`](../examples/package.json), or allow more revisions with the endpoint's `mcp.versions` setting in OpenShell's policy schema.
 - **Message size.** OpenShell inspects every client WebSocket message and closes the connection on a message over 4 MiB (measured on 0.1.8: 3.9 MiB passes, 4.1 MiB closes). Everyday CDP traffic from Puppeteer and Playwright stays far below that. Large `page.evaluate` arguments or `page.setContent` payloads can hit it.

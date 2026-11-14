@@ -63,7 +63,8 @@ endpoints:
   # end in /function or /download, the endpoints that run your own code in the
   # browser, are denied in every form: bare, per browser (/chromium/function),
   # worker-pinned (/e/<id>/...), with or without a trailing slash. This also
-  # covers /profile/<name>/download. The endpoint has no path, so these rules
+  # covers /profile/<name>/download. /config, the server configuration
+  # endpoint, is denied the same way. The endpoint has no path, so these rules
   # apply to every request to these hosts.
   - host: "production-*.browserless.io"
     port: 443
@@ -79,6 +80,10 @@ endpoints:
       - { method: "*", path: "/download/" }
       - { method: "*", path: "/**/download" }
       - { method: "*", path: "/**/download/" }
+      - { method: "*", path: "/config" }
+      - { method: "*", path: "/config/" }
+      - { method: "*", path: "/**/config" }
+      - { method: "*", path: "/**/config/" }
   # BrowserQL, on every path that ends in /bql or continues after /bql/,
   # including URLs that carry a path prefix. `*` also matches `/`. Each
   # request must be a single anonymous operation (named operations are

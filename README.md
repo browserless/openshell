@@ -67,7 +67,7 @@ The main profile, `providers/browserless.yaml`:
 - **One token, one placement.** `BROWSERLESS_TOKEN` resolves only as the `token` query parameter, for the REST and WebSocket APIs and for the MCP server (`https://mcp.browserless.io/mcp?token=…`).
 - **Only Browserless hosts.** The token is sent only to `production-*.browserless.io` (the SFO, LON and AMS regions) and to `mcp.browserless.io/mcp`. Requests from the sandbox to any other host are blocked by the sandbox's network policy.
 - **Only the processes you list.** `binaries` lets `node` and `curl` at `/usr/bin` or `/usr/local/bin` reach those hosts. Edit it to match your image.
-- **REST** with full access, including `DELETE` so an agent can stop its own sessions, except the endpoints that run your own code in the browser. Any path that ends in `/function` or `/download`, in any browser or region form, gets `policy_denied`; that includes `/profile/<name>/download`.
+- **REST** with full access, including `DELETE` so an agent can stop its own sessions, except the endpoints that run your own code in the browser. Any path that ends in `/function` or `/download`, in any browser or region form, gets `policy_denied`; that includes `/profile/<name>/download`. So does `/config`, the server configuration endpoint.
 - **BrowserQL**: every query and mutation except `reconnect`, which hands the live browser to another client. Send each request as a single anonymous operation (`mutation { … }`); named operations are denied. To keep a browser between connections, use a durable session (`POST /session`) and the connect and BrowserQL URLs it returns.
 - **WebSockets** only on the CDP and Playwright connect paths, and on the worker-pinned session and reconnect URLs that the API returns.
 - **Every MCP tool except `browserless_function` and the two Stripe Link tools.** OpenShell answers `browserless_function`, `browserless_link_checkout` and `browserless_link_connect` with `policy_denied`. The Stripe Link rules cover the MCP tools only. REST stays open, including Browserless's own agent endpoints, which can use a Stripe Link wallet connected to the account. If the account has a connected wallet, use the [Link-gated profiles](docs/stripe-link-approval.md), whose REST access is an allow-list.
@@ -100,6 +100,7 @@ Puppeteer, Playwright, BrowserQL and MCP examples, with an image to run them in,
 - **OpenShell 0.1.8 and newer** need WebSocket paths on their own `protocol: websocket` endpoints, and resolve each credential only where the profile places it. The main profile does both.
 - **Earlier OpenShell releases** are not supported.
 - OpenShell closes the connection on any client WebSocket message over 4 MiB.
+- OpenShell accepts MCP revision `2025-11-25` by default; older MCP clients get `mcp_protocol_version_not_allowed`.
 
 Details, and what each profile was tested on: [docs/version-notes.md](docs/version-notes.md).
 
