@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Browserless
+# SPDX-License-Identifier: MIT
+#
+# Browserless with Stripe Link behind human approval. Ordinary browsing works.
+# The Stripe Link REST paths are not allowed, so an agent must request them
+# through the OpenShell policy advisor and an operator must approve. The
+# browserless_link_connect MCP tool is allowed only while the operator attaches
+# the companion browserless-link-approve provider. browserless_link_checkout is
+# always denied.
+id: browserless-linkgated
+display_name: Browserless (Stripe Link gated)
+description: Browserless with Stripe Link behind human approval
+category: other
+credentials:
+  - name: api_token
+    description: Browserless API token, sent as the token query parameter
+    env_vars: [BROWSERLESS_TOKEN]
+    required: true
+    auth_style: query
+    query_param: token
+discovery:
+  credentials: [api_token]
+endpoints:
+  - host: "production-*.browserless.io"
+    port: 443
+    protocol: rest
+    enforcement: enforce
+    rules:
+      - allow: { method: POST, path: "/content" }
+      - allow: { method: GET, path: "/json/*" }
+      - allow: { method: GET, path: "/json/*/" }
+  # BrowserQL on /chromium/bql: single anonymous operations, without `reconnect`.
+  - { host: "production-*.browserless.io", port: 443, path: "/chromium/bql", protocol: graphql, access: full, enforcement: enforce, deny_rules: [{ operation_type: mutation, fields: [reconnect] }, { operation_type: query, operation_name: "?*" }, { operation_type: mutation, operation_name: "?*" }, { operation_type: subscription, operation_name: "?*" }] }
+  - { host: "production-*.browserless.io", port: 443, path: "/", protocol: websocket, access: read-write, enforcement: enforce }
+  - host: mcp.browserless.io
+    port: 443
+    path: /mcp
+    protocol: mcp
+    enforcement: enforce
+    rules:
+      - allow: { method: initialize }
+      - allow: { method: notifications/initialized }
+      - allow: { method: tools/list }
+      - allow: { method: tools/call, tool: browserless_smartscraper }
+      - allow: { method: tools/call, tool: browserless_usage }
+    deny_rules:
+      - { method: tools/call, tool: browserless_link_checkout }
+binaries: [/usr/bin/node, /usr/local/bin/node, /usr/bin/curl, /usr/local/bin/curl]

@@ -1,0 +1,39 @@
+name: Profile lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    # Weekly, the day after OpenShell's usual Tuesday release, so a breaking
+    # provider change shows up here before users hit it.
+    - cron: '0 6 * * 3'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  lint:
+    name: Lint profiles (OpenShell ${{ matrix.openshell }})
+    # ubuntu-latest ships Docker, which the throwaway gateway uses as its
+    # compute driver.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # latest: what new users install. v0.1.8: the oldest supported release.
+        openshell: [latest, v0.1.8]
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Lint, import and attach every profile
+        env:
+          OPENSHELL_VERSION: ${{ matrix.openshell }}
+        run: scripts/lint-profiles.sh
