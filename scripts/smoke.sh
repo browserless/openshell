@@ -14,7 +14,7 @@ set -euo pipefail
 provider="${1:-browserless}"
 
 # shellcheck disable=SC2016 # ${...} below is JavaScript, evaluated inside the sandbox
-out="$(openshell sandbox create --no-keep --from node:24-bookworm-slim --provider "$provider" -- node -e '
+out="$(openshell sandbox create --no-keep --from node:26-trixie-slim --provider "$provider" -- node -e '
   fetch(`https://production-sfo.browserless.io/content?token=${process.env.BROWSERLESS_TOKEN}`, {
     method: "POST",
     headers: { "content-type": "application/json" },

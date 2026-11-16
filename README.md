@@ -81,7 +81,7 @@ Usage is billed to the Browserless account that owns the token, as it is outside
 This starts a throwaway sandbox and fetches example.com through Browserless. OpenShell's default sandbox image has no `curl` or `node`, so it uses the official Node image:
 
 ```shell
-openshell sandbox create --no-keep --from node:24-bookworm-slim --provider browserless -- node -e '
+openshell sandbox create --no-keep --from node:26-trixie-slim --provider browserless -- node -e '
   fetch(`https://production-sfo.browserless.io/content?token=${process.env.BROWSERLESS_TOKEN}`, {
     method: "POST",
     headers: { "content-type": "application/json" },

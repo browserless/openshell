@@ -17,7 +17,7 @@ A gateway keeps the profile it imported; editing the YAML afterwards changes not
 
 ## Sandbox images
 
-- **Bring your own image.** OpenShell's default sandbox image has no `curl`, `node` or `python`. Pass `--from` with an image that has your client, such as `node:24-bookworm-slim` or the image built from [`examples/Dockerfile`](../examples/Dockerfile).
+- **Bring your own image.** OpenShell's default sandbox image has no `curl`, `node` or `python`. Pass `--from` with an image that has your client, such as `node:26-trixie-slim` or the image built from [`examples/Dockerfile`](../examples/Dockerfile).
 - **Install code where the sandbox can read it.** The default filesystem policy does not allow reads under `/opt`. Put scripts and `node_modules` under `/usr` (the examples image uses `/usr/local/lib/browserless-examples`) or in the sandbox working directory, or pass a policy that allows your path.
 - **Match `binaries` to your image.** The profile lets only `node` and `curl` at `/usr/bin` or `/usr/local/bin` reach Browserless. Add your paths if your client lives elsewhere.
 - **macOS VM driver.** On 0.1.8 the VM driver could not prepare images published with Docker's v2 manifest format, such as `curlimages/curl`. Images published with an OCI index, such as the official `node` images, work.

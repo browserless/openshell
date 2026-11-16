@@ -37,7 +37,7 @@
 #                    agent endpoints, which can use a Stripe Link wallet
 #                    connected to the account; for such an account use
 #                    browserless-linkgated.yaml instead.
-# Smoke test:        openshell sandbox create --no-keep --from node:24-bookworm-slim \
+# Smoke test:        openshell sandbox create --no-keep --from node:26-trixie-slim \
 #                      --provider <name> -- node -e '
 #                      fetch(`https://production-sfo.browserless.io/content?token=${process.env.BROWSERLESS_TOKEN}`, {
 #                        method: "POST",

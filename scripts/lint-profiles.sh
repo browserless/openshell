@@ -17,13 +17,13 @@
 #                            gateway through the Docker host, and the CLI
 #                            through 127.0.0.1.
 #   OPENSHELL_SANDBOX_IMAGE  image for the check sandboxes (default:
-#                            node:24-bookworm-slim)
+#                            node:26-trixie-slim)
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 version="${OPENSHELL_VERSION:-latest}"
 port="${OPENSHELL_PORT:-17670}"
-sandbox_image="${OPENSHELL_SANDBOX_IMAGE:-node:24-bookworm-slim}"
+sandbox_image="${OPENSHELL_SANDBOX_IMAGE:-node:26-trixie-slim}"
 export OPENSHELL_BIND_ADDRESS="${OPENSHELL_BIND_ADDRESS:-0.0.0.0}"
 
 case "$(uname -m)" in

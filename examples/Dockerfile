@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 Browserless
 # SPDX-License-Identifier: MIT
 #
-# Sandbox image for the examples: Node 24 plus the pinned Browserless clients.
+# Sandbox image for the examples: Node 26 plus the pinned Browserless clients.
 #   docker build -t browserless-openshell-examples examples
-FROM node:24-bookworm-slim
+FROM node:26-trixie-slim
 
 # Under /usr so OpenShell's default filesystem policy can read it; /opt is not
 # readable inside a sandbox unless a custom policy allows it.
