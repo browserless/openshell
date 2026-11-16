@@ -1,0 +1,15 @@
+{
+  "name": "browserless-openshell-examples",
+  "private": true,
+  "type": "module",
+  "description": "Browserless clients to run inside an OpenShell sandbox",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "playwright-core": "1.64.1",
+    "puppeteer-core": "25.14.0"
+  }
+}
